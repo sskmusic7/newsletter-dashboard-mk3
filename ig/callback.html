@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COTMM – Instagram Callback</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            background: #1a1a1a;
+            border-radius: 12px;
+            padding: 40px;
+            max-width: 500px;
+            text-align: center;
+        }
+        
+        h1 {
+            margin-bottom: 20px;
+            color: #667eea;
+        }
+        
+        pre {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+            font-size: 13px;
+            color: #c9d1d9;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .success {
+            color: #38ef7d;
+        }
+        
+        .error {
+            color: #ff6b6b;
+        }
+        
+        .spinner {
+            border: 3px solid #333;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Completing Instagram connection…</h1>
+        <div id="status">
+            <div class="spinner"></div>
+            <p>Loading…</p>
+        </div>
+        <pre id="statusText" style="display: none;"></pre>
+    </div>
+
+    <script>
+        (async function() {
+            const params = new URLSearchParams(window.location.search);
+            const code = params.get('code');
+            const error = params.get('error');
+            const errorReason = params.get('error_reason');
+            const statusEl = document.getElementById('status');
+            const statusTextEl = document.getElementById('statusText');
+
+            if (error) {
+                statusEl.innerHTML = `<p class="error">Connection failed: ${errorReason || error}</p>`;
+                statusTextEl.textContent = `Error: ${error}\nReason: ${errorReason || 'Unknown'}`;
+                statusTextEl.style.display = 'block';
+                statusTextEl.className = 'error';
+                
+                setTimeout(() => {
+                    const dashboardPath = window.location.pathname.includes('ig/') 
+                        ? '../dashboard.html' 
+                        : '/dashboard.html';
+                    window.location.href = dashboardPath;
+                }, 3000);
+                return;
+            }
+
+            if (!code) {
+                statusEl.innerHTML = '<p class="error">Missing authorization code.</p>';
+                statusTextEl.textContent = 'No code parameter found in URL';
+                statusTextEl.style.display = 'block';
+                statusTextEl.className = 'error';
+                
+                setTimeout(() => {
+                    const dashboardPath = window.location.pathname.includes('ig/') 
+                        ? '../dashboard.html' 
+                        : '/dashboard.html';
+                    window.location.href = dashboardPath;
+                }, 3000);
+                return;
+            }
+
+            try {
+                // Determine API base URL and endpoint
+                const apiBaseUrl = window.location.origin;
+                const apiEndpoint = window.location.hostname.includes('netlify.app')
+                    ? `${apiBaseUrl}/.netlify/functions/instagram-exchange`
+                    : `${apiBaseUrl}/api/instagram/exchange`;
+                
+                const resp = await fetch(apiEndpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code })
+                });
+
+                const data = await resp.json();
+
+                if (!resp.ok) {
+                    throw new Error(data.error || 'Unknown error');
+                }
+
+                // Store in localStorage
+                localStorage.setItem('cotmm_ig_captions', JSON.stringify(data.captions || []));
+                localStorage.setItem('cotmm_ig_media', JSON.stringify(data.media || []));
+                localStorage.setItem('cotmm_ig_user_id', data.ig_user_id || '');
+                localStorage.setItem('cotmm_ig_page_id', data.page_id || '');
+
+                statusEl.innerHTML = `<p class="success">✅ Successfully connected!</p>`;
+                statusTextEl.textContent = `Fetched ${data.captions?.length || 0} captions from your Instagram account.\n\nYou can close this window and return to the dashboard.`;
+                statusTextEl.style.display = 'block';
+                statusTextEl.className = 'success';
+
+                // Redirect to dashboard after 2 seconds
+                setTimeout(() => {
+                    // Redirect to dashboard (try both root and dashboard.html)
+                    const dashboardPath = window.location.pathname.includes('ig/') 
+                        ? '../dashboard.html' 
+                        : '/dashboard.html';
+                    window.location.href = dashboardPath;
+                }, 2000);
+
+            } catch (err) {
+                statusEl.innerHTML = `<p class="error">Error: ${err.message}</p>`;
+                statusTextEl.textContent = `Error details: ${err.message}\n\nPlease try connecting again.`;
+                statusTextEl.style.display = 'block';
+                statusTextEl.className = 'error';
+                
+                setTimeout(() => {
+                    window.location.href = '/dashboard.html';
+                }, 5000);
+            }
+        })();
+    </script>
+</body>
+</html>
+
