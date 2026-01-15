@@ -247,6 +247,18 @@
             font-size: 12px;
             font-weight: 600;
             cursor: pointer;
+            z-index: 10;
+            transition: all 0.2s ease;
+        }
+        
+        .copy-button:hover {
+            background: var(--primary-hover, #5568d3);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+        
+        .copy-button:active {
+            transform: translateY(0);
         }
         
         .alert {
@@ -598,15 +610,19 @@
                     </div>
                     
                     <div style="margin-bottom: 30px; position: relative;">
-                        <h4 style="color: var(--text); margin-bottom: 10px;">1. index.html (Form Page)</h4>
-                        <button class="copy-button" onclick="copyToClipboard('indexHtml', this)" style="position: absolute; top: 40px; right: 15px;">Copy index.html</button>
-                        <pre id="indexHtml" style="max-height: 300px; overflow-y: auto; position: relative;"></pre>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <h4 style="color: var(--text); margin: 0;">1. index.html (Form Page)</h4>
+                            <button class="copy-button" onclick="copyToClipboard('indexHtml', this)" style="position: relative; top: 0; right: 0;">Copy index.html</button>
+                        </div>
+                        <pre id="indexHtml" style="max-height: 300px; overflow-y: auto; position: relative; padding-top: 10px;"></pre>
                     </div>
                     
                     <div style="margin-bottom: 30px; position: relative;">
-                        <h4 style="color: var(--text); margin-bottom: 10px;">2. thank-you.html (Thank You Page)</h4>
-                        <button class="copy-button" onclick="copyToClipboard('thankYouHtml', this)" style="position: absolute; top: 40px; right: 15px;">Copy thank-you.html</button>
-                        <pre id="thankYouHtml" style="max-height: 300px; overflow-y: auto; position: relative;"></pre>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <h4 style="color: var(--text); margin: 0;">2. thank-you.html (Thank You Page)</h4>
+                            <button class="copy-button" onclick="copyToClipboard('thankYouHtml', this)" style="position: relative; top: 0; right: 0;">Copy thank-you.html</button>
+                        </div>
+                        <pre id="thankYouHtml" style="max-height: 300px; overflow-y: auto; position: relative; padding-top: 10px;"></pre>
                     </div>
                     
                     <div class="alert alert-info">
@@ -784,15 +800,88 @@
 
         // Copy HTML files
         window.copyToClipboard = function(elementId, button) {
-            const text = document.getElementById(elementId).textContent;
-            navigator.clipboard.writeText(text).then(() => {
-                button.textContent = 'Copied!';
+            try {
+                const element = document.getElementById(elementId);
+                if (!element) {
+                    console.error('Element not found:', elementId);
+                    button.textContent = 'Error: Element not found';
+                    setTimeout(() => {
+                        if (elementId === 'indexHtml') button.textContent = 'Copy index.html';
+                        else button.textContent = 'Copy thank-you.html';
+                    }, 2000);
+                    return;
+                }
+                
+                const text = element.textContent || element.innerText;
+                if (!text || text.trim() === '') {
+                    button.textContent = 'No content to copy';
+                    setTimeout(() => {
+                        if (elementId === 'indexHtml') button.textContent = 'Copy index.html';
+                        else button.textContent = 'Copy thank-you.html';
+                    }, 2000);
+                    return;
+                }
+                
+                // Use modern clipboard API with fallback
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(text).then(() => {
+                        button.textContent = 'Copied! ✓';
+                        setTimeout(() => {
+                            if (elementId === 'indexHtml') button.textContent = 'Copy index.html';
+                            else button.textContent = 'Copy thank-you.html';
+                        }, 2000);
+                    }).catch(err => {
+                        console.error('Clipboard error:', err);
+                        // Fallback to old method
+                        fallbackCopyTextToClipboard(text, button, elementId);
+                    });
+                } else {
+                    // Fallback for older browsers
+                    fallbackCopyTextToClipboard(text, button, elementId);
+                }
+            } catch (error) {
+                console.error('Copy error:', error);
+                button.textContent = 'Copy failed';
                 setTimeout(() => {
                     if (elementId === 'indexHtml') button.textContent = 'Copy index.html';
                     else button.textContent = 'Copy thank-you.html';
                 }, 2000);
-            });
+            }
         };
+        
+        // Fallback copy method for older browsers
+        function fallbackCopyTextToClipboard(text, button, elementId) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            textArea.style.top = '-999999px';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    button.textContent = 'Copied! ✓';
+                    setTimeout(() => {
+                        if (elementId === 'indexHtml') button.textContent = 'Copy index.html';
+                        else button.textContent = 'Copy thank-you.html';
+                    }, 2000);
+                } else {
+                    throw new Error('Copy command failed');
+                }
+            } catch (err) {
+                console.error('Fallback copy error:', err);
+                button.textContent = 'Copy failed - try selecting text manually';
+                setTimeout(() => {
+                    if (elementId === 'indexHtml') button.textContent = 'Copy index.html';
+                    else button.textContent = 'Copy thank-you.html';
+                }, 2000);
+            } finally {
+                document.body.removeChild(textArea);
+            }
+        }
 
         // Copy All HTML Files (event listener is set up dynamically when HTML section is shown)
 
