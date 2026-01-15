@@ -592,6 +592,10 @@
                         Add them to your Apps Script project as HTML files.
                     </p>
                     
+                    <div style="margin-bottom: 20px;">
+                        <button class="copy-button" id="copyAllHtmlBtn" style="font-size: 16px; padding: 12px 24px;">Copy All HTML Files</button>
+                    </div>
+                    
                     <div style="margin-bottom: 30px;">
                         <h4 style="color: var(--text); margin-bottom: 10px;">1. index.html (Form Page)</h4>
                         <button class="copy-button" onclick="copyToClipboard('indexHtml', this)">Copy index.html</button>
@@ -739,6 +743,26 @@
               if (thankYouHtmlEl && htmlFiles.thankYou) {
                 thankYouHtmlEl.textContent = htmlFiles.thankYou;
               }
+              
+              // Set up copy all HTML button event listener
+              const copyAllHtmlBtn = document.getElementById('copyAllHtmlBtn');
+              if (copyAllHtmlBtn) {
+                // Remove existing listener if any
+                const newBtn = copyAllHtmlBtn.cloneNode(true);
+                copyAllHtmlBtn.parentNode.replaceChild(newBtn, copyAllHtmlBtn);
+                
+                // Add event listener to new button
+                newBtn.addEventListener('click', () => {
+                  const indexHtml = document.getElementById('indexHtml').textContent;
+                  const thankYouHtml = document.getElementById('thankYouHtml').textContent;
+                  const allHtml = `// ===== index.html =====\n\n${indexHtml}\n\n// ===== thank-you.html =====\n\n${thankYouHtml}`;
+                  
+                  navigator.clipboard.writeText(allHtml).then(() => {
+                    newBtn.textContent = 'Copied!';
+                    setTimeout(() => newBtn.textContent = 'Copy All HTML Files', 2000);
+                  });
+                });
+              }
             } else if (htmlSection) {
               // Ensure section stays hidden if HTML files weren't generated
               htmlSection.style.display = 'none';
@@ -768,6 +792,8 @@
                 }, 2000);
             });
         };
+
+        // Copy All HTML Files (event listener is set up dynamically when HTML section is shown)
 
         // ===== MK3 CODE GENERATOR - COMPLETE VERSION =====
 // ===== ai content MODULE ===== 
