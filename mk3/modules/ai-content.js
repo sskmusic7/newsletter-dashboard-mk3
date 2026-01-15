@@ -33,7 +33,7 @@ Write a short, engaging newsletter (300-500 words) in this exact voice and style
 
 DO NOT include subject line or placeholders. Just write the body content.\`;
 
-  const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent';
+  const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
   
   const payload = {
     contents: [{

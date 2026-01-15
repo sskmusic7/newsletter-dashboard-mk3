@@ -597,16 +597,16 @@
                         <button class="copy-button" id="copyAllHtmlBtn" style="font-size: 16px; padding: 12px 24px;">Copy All HTML Files</button>
                     </div>
                     
-                    <div style="margin-bottom: 30px;">
+                    <div style="margin-bottom: 30px; position: relative;">
                         <h4 style="color: var(--text); margin-bottom: 10px;">1. index.html (Form Page)</h4>
-                        <button class="copy-button" onclick="copyToClipboard('indexHtml', this)">Copy index.html</button>
-                        <pre id="indexHtml" style="max-height: 300px; overflow-y: auto;"></pre>
+                        <button class="copy-button" onclick="copyToClipboard('indexHtml', this)" style="position: absolute; top: 40px; right: 15px;">Copy index.html</button>
+                        <pre id="indexHtml" style="max-height: 300px; overflow-y: auto; position: relative;"></pre>
                     </div>
                     
-                    <div style="margin-bottom: 30px;">
+                    <div style="margin-bottom: 30px; position: relative;">
                         <h4 style="color: var(--text); margin-bottom: 10px;">2. thank-you.html (Thank You Page)</h4>
-                        <button class="copy-button" onclick="copyToClipboard('thankYouHtml', this)">Copy thank-you.html</button>
-                        <pre id="thankYouHtml" style="max-height: 300px; overflow-y: auto;"></pre>
+                        <button class="copy-button" onclick="copyToClipboard('thankYouHtml', this)" style="position: absolute; top: 40px; right: 15px;">Copy thank-you.html</button>
+                        <pre id="thankYouHtml" style="max-height: 300px; overflow-y: auto; position: relative;"></pre>
                     </div>
                     
                     <div class="alert alert-info">
@@ -833,7 +833,7 @@ Write a short, engaging newsletter (300-500 words) in this exact voice and style
 
 DO NOT include subject line or placeholders. Just write the body content.\`;
 
-  const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent';
+  const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
   
   const payload = {
     contents: [{
@@ -2586,7 +2586,7 @@ function generateHTMLFiles(config) {
         </form>
     </div>
 
-    <' + 'script>
+    <script>
         const form = document.getElementById('subscribeForm');
         const errorMsg = document.getElementById('errorMsg');
         const successMsg = document.getElementById('successMsg');
@@ -2608,9 +2608,8 @@ function generateHTMLFiles(config) {
             };
             
             try {
-                // In Apps Script, replace this line with: const webAppUrl = '<?= ScriptApp.getService().getUrl() ?>';
-                // For browser preview, use current page URL
-                const webAppUrl = window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '');
+                // Get Web App URL from Apps Script template
+                const webAppUrl = '<?= ScriptApp.getService().getUrl() ?>';
                 const response = await fetch(webAppUrl, {
                     method: 'POST',
                     headers: {
@@ -2627,7 +2626,6 @@ function generateHTMLFiles(config) {
                     form.reset();
                     
                     // Redirect to thank you page after 2 seconds
-                    // Note: In Apps Script, use ScriptApp.getService().getUrl() to get the Web App URL
                     setTimeout(() => {
                         const currentUrl = window.location.href.split('?')[0];
                         window.location.href = currentUrl + '?page=thank-you';
@@ -2644,7 +2642,7 @@ function generateHTMLFiles(config) {
                 submitBtn.textContent = 'Subscribe';
             }
         });
-    <' + '/script>
+    </script>
 </body>
 </html>`;
 
