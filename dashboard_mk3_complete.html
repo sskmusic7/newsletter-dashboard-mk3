@@ -247,6 +247,18 @@
             font-size: 12px;
             font-weight: 600;
             cursor: pointer;
+            z-index: 10;
+            transition: all 0.2s ease;
+        }
+        
+        .copy-button:hover {
+            background: var(--primary-hover, #5568d3);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+        
+        .copy-button:active {
+            transform: translateY(0);
         }
         
         .alert {
