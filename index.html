@@ -2470,16 +2470,25 @@ function manualVerify(email) {
 // Generates HTML files for public form (index.html and thank-you.html)
 
 function generateHTMLFiles(config) {
-  // Note: The HTML will use ScriptApp.getService().getUrl() in the actual generated code
-  // This placeholder is just for the template
-  const webAppUrlPlaceholder = 'ScriptApp.getService().getUrl()';
+  // HTML escaping utility (FIXED: Prevents code leakage)
+  function esc(text) {
+    if (!text) return '';
+    const map = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#039;'
+    };
+    return String(text).replace(/[&<>"']/g, m => map[m]);
+  }
   
   const indexHtml = `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Subscribe to ${config.brandName}</title>
+    <title>Subscribe - ${esc(config.brandName)}</title>
     <style>
         * {
             margin: 0;
@@ -2568,8 +2577,8 @@ function generateHTMLFiles(config) {
 </head>
 <body>
     <div class="form-container">
-        <h1>Join ${config.brandName}</h1>
-        <p class="subtitle">Subscribe to our newsletter and stay updated!</p>
+        <h1>Subscribe to ${esc(config.brandName)}</h1>
+        <p class="subtitle">${esc(config.brandBio || 'Get the latest updates and exclusive content delivered to your inbox.')}</p>
         
         <form id="subscribeForm">
             <div class="form-group">
@@ -2586,63 +2595,66 @@ function generateHTMLFiles(config) {
         </form>
     </div>
 
-    __SCRIPT_START__
-        const form = document.getElementById('subscribeForm');
-        const errorMsg = document.getElementById('errorMsg');
-        const successMsg = document.getElementById('successMsg');
-        const submitBtn = document.getElementById('submitBtn');
+    <script>
+    (function() {
+        'use strict';
         
-        form.addEventListener('submit', async (e) => {
+        var form = document.getElementById('subscribeForm');
+        var errorMsg = document.getElementById('errorMsg');
+        var successMsg = document.getElementById('successMsg');
+        var submitBtn = document.getElementById('submitBtn');
+        
+        form.addEventListener('submit', function(e) {
             e.preventDefault();
             
-            // Hide previous messages
             errorMsg.style.display = 'none';
             successMsg.style.display = 'none';
             submitBtn.disabled = true;
             submitBtn.textContent = 'Subscribing...';
             
-            const formData = {
+            var formData = {
                 email: document.getElementById('email').value.trim(),
                 name: document.getElementById('name').value.trim(),
                 source: 'direct'
             };
             
-            try {
-                // Get Web App URL from Apps Script template
-                const webAppUrl = '__APPS_SCRIPT_URL__';
-                const response = await fetch(webAppUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(formData)
-                });
-                
-                const result = await response.json();
-                
+            var scriptUrl = window.location.href.split('?')[0];
+            
+            fetch(scriptUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(result) {
                 if (result.success) {
                     successMsg.textContent = 'Success! Check your email for confirmation.';
                     successMsg.style.display = 'block';
                     form.reset();
                     
-                    // Redirect to thank you page after 2 seconds
-                    setTimeout(() => {
-                        const currentUrl = window.location.href.split('?')[0];
-                        window.location.href = currentUrl + '?page=thank-you';
+                    setTimeout(function() {
+                        window.location.href = scriptUrl + '?page=thank-you';
                     }, 2000);
                 } else {
                     errorMsg.textContent = result.error || 'Something went wrong. Please try again.';
                     errorMsg.style.display = 'block';
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Subscribe';
                 }
-            } catch (error) {
+            })
+            .catch(function(error) {
                 errorMsg.textContent = 'Network error. Please check your connection and try again.';
                 errorMsg.style.display = 'block';
-            } finally {
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Subscribe';
-            }
+            });
         });
-    __SCRIPT_END__
+    })();
+    <\/script>
 </body>
 </html>`;
 
@@ -2651,7 +2663,7 @@ function generateHTMLFiles(config) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thank You - ${config.brandName}</title>
+    <title>Thank You - ${esc(config.brandName)}</title>
     <style>
         * {
             margin: 0;
@@ -2712,22 +2724,22 @@ function generateHTMLFiles(config) {
 <body>
     <div class="thank-you-container">
         <div class="checkmark">✓</div>
-        <h1>Thank You!</h1>
-        <p>You've successfully subscribed to ${config.brandName}!</p>
-        <p>${config.verification ? 'Check your email for a confirmation message. Reply to verify your subscription!' : 'We\'ll send you updates and valuable content soon.'}</p>
+        <h1>You're All Set! 🎉</h1>
+        <p>Thank you for subscribing to <strong>${esc(config.brandName)}</strong>!</p>
+        <p>${config.verification ? esc('We\'ve sent you a welcome email. Please check your inbox and reply to confirm your subscription.') : esc('You\'ll start receiving our exclusive updates soon.')}</p>
         <div class="info">
-            <strong>What's next?</strong><br>
-            ${config.verification ? 'Reply to the email we just sent to confirm your subscription and receive your welcome content!' : 'Keep an eye on your inbox for our latest updates and exclusive content.'}
+            <strong>What Happens Next?</strong><br>
+            ${config.verification ? 
+                '<ul style="text-align: left; margin-top: 15px; padding-left: 20px;"><li>Check your inbox for our welcome email</li><li>Reply to the email to confirm your subscription</li><li>Get instant access to exclusive content</li></ul>' : 
+                '<ul style="text-align: left; margin-top: 15px; padding-left: 20px;"><li>Check your inbox for our welcome email</li><li>Look out for regular updates from us</li><li>Enjoy exclusive content and insights</li></ul>'}
         </div>
     </div>
 </body>
 </html>`;
 
-  // Replace placeholders with actual script tags and Apps Script syntax
-  const finalIndexHtml = indexHtml
-    .replace(/__SCRIPT_START__/g, '<script>')
-    .replace(/__SCRIPT_END__/g, '</script>')
-    .replace(/__APPS_SCRIPT_URL__/g, '<?= ScriptApp.getService().getUrl() ?>');
+  // FIXED: No more placeholder replacement - using direct template literals
+  // The generated HTML is already complete and properly escaped
+  const finalIndexHtml = indexHtml;
   const finalThankYouHtml = thankYouHtml;
   
   return {
