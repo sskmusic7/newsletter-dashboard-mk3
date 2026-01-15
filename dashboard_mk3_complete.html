@@ -726,12 +726,14 @@
             generatedCode.textContent = code;
             codeOutput.style.display = 'block';
             
-            // Show HTML files section
+            // Show HTML files section ONLY after code is generated
             const htmlSection = document.getElementById('htmlFilesSection');
-            if (htmlSection) {
+            if (htmlSection && htmlFiles) {
               htmlSection.style.display = 'block';
-              document.getElementById('indexHtml').textContent = htmlFiles.index;
-              document.getElementById('thankYouHtml').textContent = htmlFiles.thankYou;
+              const indexHtmlEl = document.getElementById('indexHtml');
+              const thankYouHtmlEl = document.getElementById('thankYouHtml');
+              if (indexHtmlEl) indexHtmlEl.textContent = htmlFiles.index || '';
+              if (thankYouHtmlEl) thankYouHtmlEl.textContent = htmlFiles.thankYou || '';
             }
             
             codeOutput.scrollIntoView({ behavior: 'smooth', block: 'center' });
