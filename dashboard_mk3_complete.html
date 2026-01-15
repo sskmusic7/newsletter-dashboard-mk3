@@ -2570,8 +2570,9 @@ function generateHTMLFiles(config) {
             };
             
             try {
-                // Get Web App URL from Apps Script (this will be replaced when deployed)
-                const webAppUrl = ScriptApp ? ScriptApp.getService().getUrl() : window.location.origin + window.location.pathname;
+                // In Apps Script, replace this line with: const webAppUrl = '<?= ScriptApp.getService().getUrl() ?>';
+                // For browser preview, use current page URL
+                const webAppUrl = window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '');
                 const response = await fetch(webAppUrl, {
                     method: 'POST',
                     headers: {
