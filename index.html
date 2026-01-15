@@ -2732,6 +2732,35 @@ function generateHTMLFiles(config) {
 // ===== WEBHOOK HANDLER MODULE =====
 // Generates webhook handler for ManyChat and direct form submissions
 
+function generateDoGetFunction(config) {
+  return `// ===== HTML FILE SERVER =====
+/**
+ * doGet function - serves HTML files for public form
+ * This function is called when someone visits your web app URL
+ * 
+ * Routes:
+ * - / or /index -> serves index.html (subscription form)
+ * - /thank-you or /thankyou -> serves thank-you.html (thank you page)
+ */
+function doGet(e) {
+  const path = e.parameter.path || '';
+  
+  // Determine which HTML file to serve
+  if (path === 'thank-you' || path === 'thankyou' || e.parameter.thankyou) {
+    return HtmlService.createTemplateFromFile('thank-you')
+      .evaluate()
+      .setTitle('Thank You - ' + CONFIG.BRAND_NAME)
+      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+  }
+  
+  // Default: serve index.html (subscription form)
+  return HtmlService.createTemplateFromFile('index')
+    .evaluate()
+    .setTitle('Subscribe - ' + CONFIG.BRAND_NAME)
+    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+}`;
+}
+
 function generateWebhookHandler(config) {
   const needsSheet = !config.sheetId || config.sheetId.trim() === '';
   const getSheetCall = needsSheet ? 'getOrCreateSpreadsheet()' : 'getSpreadsheet()';
@@ -2964,11 +2993,15 @@ function generateMK3Script(config) {
   parts.push(generateNewsletterFunctions(config));
   parts.push('\n');
   
-  // 11. Webhook Handler
+  // 11. doGet Function (for serving HTML files)
+  parts.push(generateDoGetFunction(config));
+  parts.push('\n');
+  
+  // 12. Webhook Handler
   parts.push(generateWebhookHandler(config));
   parts.push('\n');
   
-  // 12. Test Functions
+  // 13. Test Functions
   parts.push(generateTestFunctions(config));
   parts.push('\n');
   
