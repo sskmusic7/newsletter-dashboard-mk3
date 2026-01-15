@@ -87,7 +87,7 @@ function getEmailTemplate(content) {
     \`
   };
   
-  return templates[CONFIG.TEMPLATE].replace(/\{\{CONTENT\}\}/g, content);
+  return templates[CONFIG.TEMPLATE].replace(new RegExp('\\{\\{CONTENT\\}\\}', 'g'), content);
 }`;
 }
 
