@@ -2586,7 +2586,7 @@ function generateHTMLFiles(config) {
         </form>
     </div>
 
-    <script>
+    __SCRIPT_START__
         const form = document.getElementById('subscribeForm');
         const errorMsg = document.getElementById('errorMsg');
         const successMsg = document.getElementById('successMsg');
@@ -2642,7 +2642,7 @@ function generateHTMLFiles(config) {
                 submitBtn.textContent = 'Subscribe';
             }
         });
-    </script>
+    __SCRIPT_END__
 </body>
 </html>`;
 
@@ -2723,9 +2723,13 @@ function generateHTMLFiles(config) {
 </body>
 </html>`;
 
+  // Replace placeholders with actual script tags
+  const finalIndexHtml = indexHtml.replace(/__SCRIPT_START__/g, '<script>').replace(/__SCRIPT_END__/g, '</script>');
+  const finalThankYouHtml = thankYouHtml;
+  
   return {
-    index: indexHtml,
-    thankYou: thankYouHtml
+    index: finalIndexHtml,
+    thankYou: finalThankYouHtml
   };
 }
 
