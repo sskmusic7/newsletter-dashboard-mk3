@@ -584,6 +584,35 @@
                     <pre id="generatedCode"></pre>
                 </div>
 
+                <!-- HTML Files Section -->
+                <div id="htmlFilesSection" style="display: none; margin-top: 30px;">
+                    <h3 style="color: var(--primary); margin-bottom: 20px;">📄 HTML Files (For Public Form)</h3>
+                    <p style="color: var(--text-muted); margin-bottom: 20px;">
+                        These HTML files are needed if you want a public form on your website. 
+                        Add them to your Apps Script project as HTML files.
+                    </p>
+                    
+                    <div style="margin-bottom: 30px;">
+                        <h4 style="color: var(--text); margin-bottom: 10px;">1. index.html (Form Page)</h4>
+                        <button class="copy-button" onclick="copyToClipboard('indexHtml', this)">Copy index.html</button>
+                        <pre id="indexHtml" style="max-height: 300px; overflow-y: auto;"></pre>
+                    </div>
+                    
+                    <div style="margin-bottom: 30px;">
+                        <h4 style="color: var(--text); margin-bottom: 10px;">2. thank-you.html (Thank You Page)</h4>
+                        <button class="copy-button" onclick="copyToClipboard('thankYouHtml', this)">Copy thank-you.html</button>
+                        <pre id="thankYouHtml" style="max-height: 300px; overflow-y: auto;"></pre>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <strong>📝 How to Add HTML Files:</strong><br>
+                        1. In Google Apps Script, click the <strong>+</strong> button → <strong>HTML</strong><br>
+                        2. Name it <strong>index</strong> and paste the first HTML code<br>
+                        3. Create another HTML file named <strong>thank-you</strong> and paste the second HTML code<br>
+                        4. The generated script includes a <code>doGet()</code> function that serves the form automatically
+                    </div>
+                </div>
+
                 <div class="alert alert-warning">
                     <strong>🔐 Add API Keys to Script Properties:</strong><br>
                     1. In Apps Script: ⚙️ Project Settings → Script Properties<br>
@@ -692,8 +721,19 @@
             }
             
             const code = generateMK3Script(config);
+            const htmlFiles = generateHTMLFiles(config);
+            
             generatedCode.textContent = code;
             codeOutput.style.display = 'block';
+            
+            // Show HTML files section
+            const htmlSection = document.getElementById('htmlFilesSection');
+            if (htmlSection) {
+              htmlSection.style.display = 'block';
+              document.getElementById('indexHtml').textContent = htmlFiles.index;
+              document.getElementById('thankYouHtml').textContent = htmlFiles.thankYou;
+            }
+            
             codeOutput.scrollIntoView({ behavior: 'smooth', block: 'center' });
         });
 
@@ -706,6 +746,18 @@
                 setTimeout(() => btn.textContent = 'Copy Code', 2000);
             });
         });
+
+        // Copy HTML files
+        window.copyToClipboard = function(elementId, button) {
+            const text = document.getElementById(elementId).textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                button.textContent = 'Copied!';
+                setTimeout(() => {
+                    if (elementId === 'indexHtml') button.textContent = 'Copy index.html';
+                    else button.textContent = 'Copy thank-you.html';
+                }, 2000);
+            });
+        };
 
         // ===== MK3 CODE GENERATOR - COMPLETE VERSION =====
 // ===== ai content MODULE ===== 
@@ -2376,7 +2428,268 @@ function manualVerify(email) {
 
 
 
-// ===== weuhook MODULE ===== 
+// ===== HTML FILES GENERATOR =====
+// Generates HTML files for public form (index.html and thank-you.html)
+
+function generateHTMLFiles(config) {
+  // Note: The HTML will use ScriptApp.getService().getUrl() in the actual generated code
+  // This placeholder is just for the template
+  const webAppUrlPlaceholder = 'ScriptApp.getService().getUrl()';
+  
+  const indexHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subscribe to ${config.brandName}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .form-container {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            color: #333;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+        }
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .error {
+            color: #ff6b6b;
+            margin-top: 10px;
+            display: none;
+        }
+        .success {
+            color: #38ef7d;
+            margin-top: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1>Join ${config.brandName}</h1>
+        <p class="subtitle">Subscribe to our newsletter and stay updated!</p>
+        
+        <form id="subscribeForm">
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" id="name" name="name" placeholder="Your name" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" placeholder="your@email.com" required>
+            </div>
+            <button type="submit" id="submitBtn">Subscribe</button>
+            <div class="error" id="errorMsg"></div>
+            <div class="success" id="successMsg"></div>
+        </form>
+    </div>
+
+    <script>
+        const form = document.getElementById('subscribeForm');
+        const errorMsg = document.getElementById('errorMsg');
+        const successMsg = document.getElementById('successMsg');
+        const submitBtn = document.getElementById('submitBtn');
+        
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Hide previous messages
+            errorMsg.style.display = 'none';
+            successMsg.style.display = 'none';
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Subscribing...';
+            
+            const formData = {
+                email: document.getElementById('email').value.trim(),
+                name: document.getElementById('name').value.trim(),
+                source: 'direct'
+            };
+            
+            try {
+                const response = await fetch('${webAppUrl}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    successMsg.textContent = 'Success! Check your email for confirmation.';
+                    successMsg.style.display = 'block';
+                    form.reset();
+                    
+                    // Redirect to thank you page after 2 seconds
+                    // Note: In Apps Script, use ScriptApp.getService().getUrl() to get the Web App URL
+                    setTimeout(() => {
+                        const currentUrl = window.location.href.split('?')[0];
+                        window.location.href = currentUrl + '?page=thank-you';
+                    }, 2000);
+                } else {
+                    errorMsg.textContent = result.error || 'Something went wrong. Please try again.';
+                    errorMsg.style.display = 'block';
+                }
+            } catch (error) {
+                errorMsg.textContent = 'Network error. Please check your connection and try again.';
+                errorMsg.style.display = 'block';
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Subscribe';
+            }
+        });
+    </script>
+</body>
+</html>`;
+
+  const thankYouHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thank You - ${config.brandName}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .thank-you-container {
+            background: white;
+            border-radius: 12px;
+            padding: 60px 40px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+        .checkmark {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #38ef7d;
+            color: white;
+            font-size: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 32px;
+        }
+        p {
+            color: #666;
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        .info {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="thank-you-container">
+        <div class="checkmark">✓</div>
+        <h1>Thank You!</h1>
+        <p>You've successfully subscribed to ${config.brandName}!</p>
+        <p>${config.verification ? 'Check your email for a confirmation message. Reply to verify your subscription!' : 'We\'ll send you updates and valuable content soon.'}</p>
+        <div class="info">
+            <strong>What's next?</strong><br>
+            ${config.verification ? 'Reply to the email we just sent to confirm your subscription and receive your welcome content!' : 'Keep an eye on your inbox for our latest updates and exclusive content.'}
+        </div>
+    </div>
+</body>
+</html>`;
+
+  return {
+    index: indexHtml,
+    thankYou: thankYouHtml
+  };
+}
+
 // ===== WEBHOOK HANDLER MODULE =====
 // Generates webhook handler for ManyChat and direct form submissions
 
@@ -2625,10 +2938,11 @@ function generateMK3Script(config) {
 // 
 // Next Steps:
 // 1. Add API keys to Script Properties (see instructions in code)
-// 2. Deploy as Web App
-// 3. ${config.gmail ? 'Run setupAllTriggers() to enable Gmail reply detection' : ''}
-// 4. Connect ManyChat webhook (if using ManyChat)
-// 5. Test with testWebhook() and sendTestNewsletter()
+// 2. Add HTML files (index.html and thank-you.html) to Apps Script project
+// 3. Deploy as Web App
+// 4. ${config.gmail ? 'Run setupAllTriggers() to enable Gmail reply detection' : ''}
+// 5. Connect ManyChat webhook (if using ManyChat)
+// 6. Test with testWebhook() and sendTestNewsletter()
 //
 // Generated by MK3 Dashboard
 `);
