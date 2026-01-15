@@ -727,13 +727,21 @@
             codeOutput.style.display = 'block';
             
             // Show HTML files section ONLY after code is generated
+            // Only generate HTML files if user wants them (optional feature)
             const htmlSection = document.getElementById('htmlFilesSection');
             if (htmlSection && htmlFiles) {
               htmlSection.style.display = 'block';
               const indexHtmlEl = document.getElementById('indexHtml');
               const thankYouHtmlEl = document.getElementById('thankYouHtml');
-              if (indexHtmlEl) indexHtmlEl.textContent = htmlFiles.index || '';
-              if (thankYouHtmlEl) thankYouHtmlEl.textContent = htmlFiles.thankYou || '';
+              if (indexHtmlEl && htmlFiles.index) {
+                indexHtmlEl.textContent = htmlFiles.index;
+              }
+              if (thankYouHtmlEl && htmlFiles.thankYou) {
+                thankYouHtmlEl.textContent = htmlFiles.thankYou;
+              }
+            } else if (htmlSection) {
+              // Ensure section stays hidden if HTML files weren't generated
+              htmlSection.style.display = 'none';
             }
             
             codeOutput.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -2550,7 +2558,7 @@ function generateHTMLFiles(config) {
         </form>
     </div>
 
-    <script>
+    <' + 'script>
         const form = document.getElementById('subscribeForm');
         const errorMsg = document.getElementById('errorMsg');
         const successMsg = document.getElementById('successMsg');
@@ -2608,7 +2616,7 @@ function generateHTMLFiles(config) {
                 submitBtn.textContent = 'Subscribe';
             }
         });
-    </script>
+    <' + '/script>
 </body>
 </html>`;
 
