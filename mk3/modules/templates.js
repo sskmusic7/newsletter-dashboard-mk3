@@ -28,7 +28,7 @@ function getEmailTemplate(content) {
             <h1 style="margin: 0; font-size: 28px;">\${CONFIG.BRAND_NAME}</h1>
           </div>
           <div class="content">
-            \${content}
+            {{CONTENT}}
           </div>
           <div class="footer">
             <p>You're receiving this because you subscribed to \${CONFIG.BRAND_NAME}</p>
@@ -54,7 +54,7 @@ function getEmailTemplate(content) {
       <body>
         <div class="container">
           <div class="content">
-            \${content}
+            {{CONTENT}}
           </div>
           <div class="footer">
             <p>\${CONFIG.BRAND_NAME}</p>
@@ -77,7 +77,7 @@ function getEmailTemplate(content) {
       </head>
       <body>
         <div class="container">
-          \${content}
+          {{CONTENT}}
           <div class="footer">
             <p>\${CONFIG.BRAND_NAME}</p>
           </div>
@@ -87,7 +87,7 @@ function getEmailTemplate(content) {
     \`
   };
   
-  return templates[CONFIG.TEMPLATE].replace('\\\${content}', content);
+  return templates[CONFIG.TEMPLATE].replace(/\{\{CONTENT\}\}/g, content);
 }`;
 }
 
