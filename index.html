@@ -2570,7 +2570,9 @@ function generateHTMLFiles(config) {
             };
             
             try {
-                const response = await fetch('${webAppUrl}', {
+                // Get Web App URL from Apps Script (this will be replaced when deployed)
+                const webAppUrl = ScriptApp ? ScriptApp.getService().getUrl() : window.location.origin + window.location.pathname;
+                const response = await fetch(webAppUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
