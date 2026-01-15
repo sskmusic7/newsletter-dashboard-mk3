@@ -2609,7 +2609,7 @@ function generateHTMLFiles(config) {
             
             try {
                 // Get Web App URL from Apps Script template
-                const webAppUrl = '<?= ScriptApp.getService().getUrl() ?>';
+                const webAppUrl = '__APPS_SCRIPT_URL__';
                 const response = await fetch(webAppUrl, {
                     method: 'POST',
                     headers: {
@@ -2723,8 +2723,11 @@ function generateHTMLFiles(config) {
 </body>
 </html>`;
 
-  // Replace placeholders with actual script tags
-  const finalIndexHtml = indexHtml.replace(/__SCRIPT_START__/g, '<script>').replace(/__SCRIPT_END__/g, '</script>');
+  // Replace placeholders with actual script tags and Apps Script syntax
+  const finalIndexHtml = indexHtml
+    .replace(/__SCRIPT_START__/g, '<script>')
+    .replace(/__SCRIPT_END__/g, '</script>')
+    .replace(/__APPS_SCRIPT_URL__/g, '<?= ScriptApp.getService().getUrl() ?>');
   const finalThankYouHtml = thankYouHtml;
   
   return {
@@ -3027,7 +3030,7 @@ function generateMK3Script(config) {
 }
 
 // NOTE: All module functions are defined in separate files in the modules/ directory
-// In a browser environment, these would be loaded via <script> tags before this file
+// In a browser environment, these would be loaded via script tags before this file
 // For now, the functions are assumed to be available in the global scope
 // 
 // Module functions (loaded from modules/):
