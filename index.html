@@ -2628,6 +2628,12 @@ function generateHTMLFiles(config) {
                 body: JSON.stringify(formData)
             })
             .then(function(response) {
+                // Check if response is OK before parsing
+                if (!response.ok) {
+                    return response.text().then(function(text) {
+                        throw new Error('Server error: ' + response.status + ' - ' + text);
+                    });
+                }
                 return response.json();
             })
             .then(function(result) {
@@ -2647,7 +2653,8 @@ function generateHTMLFiles(config) {
                 }
             })
             .catch(function(error) {
-                errorMsg.textContent = 'Network error. Please check your connection and try again.';
+                console.error('Form submission error:', error);
+                errorMsg.textContent = error.message || 'Network error. Please check your connection and try again.';
                 errorMsg.style.display = 'block';
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Subscribe';
