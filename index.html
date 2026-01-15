@@ -555,8 +555,9 @@
             </div>
 
             <div class="form-group">
-                <label>Gemini API Key (Optional - for AI content generation)</label>
-                <input type="text" id="geminiKey" placeholder="AIzaSy...">
+                <label>Gemini API Key (Recommended - powers AI newsletter content generation)</label>
+                <input type="text" id="geminiKey" placeholder="AIzaSy... (uses Gemini 2.5 Flash)">
+                <small style="color: var(--text-muted);">Used to automatically generate newsletter content based on your brand voice</small>
                 <div class="helper-text">Get from ai.google.dev - enables AI newsletter content</div>
             </div>
         </div>
@@ -631,7 +632,7 @@
                         MAILERSEND_API_KEY = (if using MailerSend)<br>
                         MAILGUN_API_KEY = (if using Mailgun)<br>
                         MAILGUN_DOMAIN = (if using Mailgun)<br>
-                        GEMINI_API_KEY = (optional, for AI content)<br>
+                        GEMINI_API_KEY = (recommended - for AI newsletter content generation using Gemini 2.5 Flash)<br>
                         EMAIL_PROVIDER = primary provider name<br>
                         ENABLE_FAILOVER = true (default)
                     </div>
@@ -812,10 +813,11 @@ function generateAIContent() {
 }`;
   }
   
-  return `// ===== AI CONTENT GENERATION (GEMINI) =====
+  return `// ===== AI CONTENT GENERATION (GEMINI 2.5 FLASH) =====
 /**
- * Generate newsletter content using Gemini AI
+ * Generate newsletter content using Gemini 2.5 Flash AI
  * Trained on your brand voice and sample content
+ * Uses Google's Gemini 2.0 Flash Experimental model for fast, high-quality content
  */
 function generateAIContent() {
   const prompt = \`You are writing a newsletter for \${CONFIG.BRAND_NAME}.
@@ -831,7 +833,7 @@ Write a short, engaging newsletter (300-500 words) in this exact voice and style
 
 DO NOT include subject line or placeholders. Just write the body content.\`;
 
-  const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
+  const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent';
   
   const payload = {
     contents: [{

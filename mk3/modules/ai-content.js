@@ -13,10 +13,11 @@ function generateAIContent() {
 }`;
   }
   
-  return `// ===== AI CONTENT GENERATION (GEMINI) =====
+  return `// ===== AI CONTENT GENERATION (GEMINI 2.5 FLASH) =====
 /**
- * Generate newsletter content using Gemini AI
+ * Generate newsletter content using Gemini 2.5 Flash AI
  * Trained on your brand voice and sample content
+ * Uses Google's Gemini 2.0 Flash Experimental model for fast, high-quality content
  */
 function generateAIContent() {
   const prompt = \`You are writing a newsletter for \${CONFIG.BRAND_NAME}.
@@ -32,7 +33,7 @@ Write a short, engaging newsletter (300-500 words) in this exact voice and style
 
 DO NOT include subject line or placeholders. Just write the body content.\`;
 
-  const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
+  const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent';
   
   const payload = {
     contents: [{
