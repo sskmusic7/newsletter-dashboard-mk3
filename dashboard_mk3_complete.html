@@ -2701,49 +2701,38 @@ function generateHTMLFiles(config) {
             submitBtn.disabled = true;
             submitBtn.textContent = 'Subscribing...';
             
-            var formData = {
-                email: document.getElementById('email').value.trim(),
-                name: document.getElementById('name').value.trim(),
-                source: 'direct'
-            };
+            var email = document.getElementById('email').value.trim();
+            var name = document.getElementById('name').value.trim();
             
+            // Build URL with parameters - this is what Code.gs doPost expects for ManyChat style
             var scriptUrl = window.location.href.split('?')[0];
+            var params = new URLSearchParams();
+            params.append('email', email);
+            params.append('name', name);
+            params.append('source', 'direct');
             
-            fetch(scriptUrl, {
+            var fullUrl = scriptUrl + '?' + params.toString();
+            
+            // Use POST with URL parameters (the way ManyChat does it)
+            // mode: 'no-cors' is REQUIRED for Google Apps Script Web Apps
+            fetch(fullUrl, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(formData)
+                mode: 'no-cors'  // Required for cross-origin Google Apps Script
             })
-            .then(function(response) {
-                // Check if response is OK before parsing
-                if (!response.ok) {
-                    return response.text().then(function(text) {
-                        throw new Error('Server error: ' + response.status + ' - ' + text);
-                    });
-                }
-                return response.json();
-            })
-            .then(function(result) {
-                if (result.success) {
-                    successMsg.textContent = 'Success! Check your email for confirmation.';
-                    successMsg.style.display = 'block';
-                    form.reset();
-                    
-                    setTimeout(function() {
-                        window.location.href = scriptUrl + '?page=thank-you';
-                    }, 2000);
-                } else {
-                    errorMsg.textContent = result.error || 'Something went wrong. Please try again.';
-                    errorMsg.style.display = 'block';
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = 'Subscribe';
-                }
+            .then(function() {
+                // With no-cors, we can't read the response
+                // But if we got here without error, the request went through
+                successMsg.textContent = 'Success! Check your email for confirmation.';
+                successMsg.style.display = 'block';
+                form.reset();
+                
+                setTimeout(function() {
+                    window.location.href = scriptUrl + '?page=thank-you';
+                }, 2000);
             })
             .catch(function(error) {
-                console.error('Form submission error:', error);
-                errorMsg.textContent = error.message || 'Network error. Please check your connection and try again.';
+                console.error('Fetch error:', error);
+                errorMsg.textContent = 'Network error. Please try again.';
                 errorMsg.style.display = 'block';
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Subscribe';
