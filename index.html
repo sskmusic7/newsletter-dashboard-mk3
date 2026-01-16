@@ -660,7 +660,7 @@
                     2. Paste into Google Apps Script (script.google.com)<br>
                     3. Add API keys to Script Properties (see above)<br>
                     4. Deploy as Web App<br>
-                    5. Run setupAllTriggers() if using Gmail verification<br>
+                    5. Triggers are automatically set up on first run (if Gmail verification is enabled)<br>
                     6. Connect ManyChat webhook (if using ManyChat)
                 </div>
             </div>
@@ -1084,6 +1084,65 @@ function setupAllTriggers() {
   setupGmailReplyTrigger();
   setupSheetChangeTrigger();
   return 'All triggers set up! Replies will be checked every 5 minutes AND immediately when sheet changes.';
+}
+
+/**
+ * Check if triggers are already set up
+ * Returns true if both Gmail and sheet triggers exist
+ */
+function triggersAreSetup() {
+  const triggers = ScriptApp.getProjectTriggers();
+  let hasGmailTrigger = false;
+  let hasSheetTrigger = false;
+  
+  for (let i = 0; i < triggers.length; i++) {
+    const trigger = triggers[i];
+    if (trigger.getHandlerFunction() === 'processGmailReplies') {
+      hasGmailTrigger = true;
+    }
+    if (trigger.getHandlerFunction() === 'onSheetEdit' && trigger.getEventType() === ScriptApp.EventType.ON_CHANGE) {
+      hasSheetTrigger = true;
+    }
+  }
+  
+  return hasGmailTrigger && hasSheetTrigger;
+}
+
+/**
+ * Automatically set up triggers if they don't exist
+ * This is called automatically on first run
+ * Only sets up if Gmail detection is enabled
+ */
+function ensureTriggersAreSetup() {
+  if (!CONFIG.ENABLE_GMAIL_DETECTION) {
+    Logger.log('Gmail detection is disabled - skipping trigger setup');
+    return 'Gmail detection is disabled';
+  }
+  
+  if (triggersAreSetup()) {
+    Logger.log('Triggers already exist - skipping auto-setup');
+    return 'Triggers already set up';
+  }
+  
+  try {
+    Logger.log('Auto-setting up triggers...');
+    setupAllTriggers();
+    Logger.log('Triggers auto-setup completed successfully!');
+    return 'Triggers automatically set up successfully!';
+  } catch (error) {
+    Logger.log('Error auto-setting up triggers: ' + error);
+    return 'Error setting up triggers: ' + error.toString();
+  }
+}
+
+/**
+ * onOpen function - runs when Apps Script editor is opened
+ * Automatically sets up triggers if Gmail detection is enabled
+ */
+function onOpen() {
+  if (CONFIG.ENABLE_GMAIL_DETECTION) {
+    ensureTriggersAreSetup();
+  }
 }
 
 /**
@@ -2889,6 +2948,11 @@ function doPost(e) {
     const ss = ${getSheetCall};
     const sheet = initializeSheet();
     
+    // Auto-setup triggers on first run (if Gmail detection is enabled)
+    if (CONFIG.ENABLE_GMAIL_DETECTION && typeof ensureTriggersAreSetup === 'function') {
+      ensureTriggersAreSetup();
+    }
+    
     // Handle ManyChat submissions (URL parameters)
     if (e.parameter && e.parameter.email) {
       const email = e.parameter.email.trim().toLowerCase();
@@ -3127,7 +3191,7 @@ function generateMK3Script(config) {
 // 1. Add API keys to Script Properties (see instructions in code)
 // 2. Add HTML files (index.html and thank-you.html) to Apps Script project
 // 3. Deploy as Web App
-// 4. ${config.gmail ? 'Run setupAllTriggers() to enable Gmail reply detection' : ''}
+// 4. ${config.gmail ? 'Triggers will be automatically set up on first run (no action needed!)' : ''}
 // 5. Connect ManyChat webhook (if using ManyChat)
 // 6. Test with testWebhook() and sendTestNewsletter()
 //
